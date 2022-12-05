@@ -5,7 +5,7 @@
 # ## ISWZ3401-01 Inteligencia Artificial I
 # ### Diego Hiriart, Luis Corales
 
-# In[1]:
+# In[7]:
 
 
 #Necessary modules import
@@ -20,6 +20,7 @@ import io
 import scipy.misc
 from six import BytesIO
 from PIL import Image, ImageDraw, ImageFont
+from six.moves.urllib.request import urlopen
 import wget
 import tarfile
 import zipfile
@@ -57,10 +58,10 @@ for images, labels in trainingDataset.take(1):
 
 
 # # Create utilities
-# - Start the object detection part, see this tutorial as reference [TensorFlow Hub Object Detection ColabTensorFlow Hub Object Detection Colab](https://www.tensorflow.org/hub/tutorials/tf2_object_detectionhttps://www.tensorflow.org/hub/tutorials/tf2_object_detection)
+# - Start the object detection part, see this tutorial as reference [TensorFlow Hub Object Detection ColabTensorFlow Hub Object Detection Colab](https://www.tensorflow.org/hub/tutorials/tf2_object_detection)
 # - First, some utilities must be created. These will not be used later when the model is only used to recognize potholes
 
-# In[4]:
+# In[26]:
 
 
 def load_image_into_numpy_array(path):
@@ -144,6 +145,7 @@ IMAGES_FOR_TEST = {
   'Phones' : 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Biblioteca_Maim%C3%B3nides%2C_Campus_Universitario_de_Rabanales_007.jpg/1024px-Biblioteca_Maim%C3%B3nides%2C_Campus_Universitario_de_Rabanales_007.jpg',
   # Source: https://commons.wikimedia.org/wiki/File:The_smaller_British_birds_(8053836633).jpg
   'Birds' : 'https://upload.wikimedia.org/wikipedia/commons/0/09/The_smaller_British_birds_%288053836633%29.jpg',
+  'Pothole': 'data/pothole_image_data/pothole/109.jpg',
 }
 
 COCO17_HUMAN_POSE_KEYPOINTS = [(0, 1),
@@ -174,7 +176,7 @@ COCO17_HUMAN_POSE_KEYPOINTS = [(0, 1),
 
 # Now, import object detection dependencies
 
-# In[5]:
+# In[9]:
 
 
 from object_detection.utils import label_map_util
@@ -187,7 +189,7 @@ from object_detection.utils import ops as utils_ops
 
 # # Load object labels to be used
 
-# In[6]:
+# In[31]:
 
 
 PATH_TO_LABELS = 'data/mscoco_label_map.pbtxt'
@@ -197,7 +199,7 @@ category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABE
 # # Save (serialize) and load (deserialize) model
 # So that we can save the trained model and use it quickly
 
-# In[13]:
+# In[10]:
 
 
 def saveModel(model):
@@ -213,7 +215,7 @@ def loadModel(path):
 # # Select and load a pre-existing model from Tensorflow's repo 
 # It is normal to get a bunch of function importing warnings when loading the model, as long as it loads
 
-# In[8]:
+# In[7]:
 
 
 model_display_name = 'CenterNet HourGlass104 Keypoints 512x512'
@@ -258,18 +260,20 @@ saveModel(objectRecogModel)
 # # Recover the trained model
 # There may be a bunch of function importing related warnings, this is normal
 
-# In[19]:
+# In[13]:
 
 
 modelPath = '.\detection-model'
+print("Loading model...")
 objectRecogModel = loadModel(modelPath)
+print("Model loading done")
 
 
 # # Create functions to do the inference (recognize objects) and view results
 # - To recognize objects and view results, code form the Tensorflow tutorial was followed.
 # - Inorder to use live video input and view results, this tutorial was followed [Adapting to video feed - TensorFlow Object Detection API Tutorial p.2](https://www.youtube.com/watch?v=MyAOtvwTkT0&list=PLQVvvaa0QuDcNK5GeCQnxYnSSaar2tpku&index=2) or [Streaming Object Detection Video - Tensorflow Object Detection API Tutorial](https://pythonprogramming.net/video-tensorflow-object-detection-api-tutorial/)
 
-# In[20]:
+# In[16]:
 
 
 def recognizeObjectsImage(model, image_np):
@@ -354,10 +358,10 @@ def recognizeAndViewObjectsVideo(model):
 # # Testing with a sample image
 # Test the model with an existing image from the repo, needs the test_images folder from object_detection
 
-# In[21]:
+# In[41]:
 
 
-selected_image = 'Beach' # @param ['Beach', 'Dogs', 'Naxos Taverna', 'Beatles', 'Phones', 'Birds']
+selected_image = 'Pothole' # @param ['Beach', 'Dogs', 'Naxos Taverna', 'Beatles', 'Phones', 'Birds', 'Pothole']
 flip_image_horizontally = False
 convert_image_to_grayscale = False
 
@@ -380,7 +384,7 @@ plt.show()
 
 # Call inference and results visualization functions
 
-# In[22]:
+# In[42]:
 
 
 results = recognizeObjectsImage(objectRecogModel, image_np)
