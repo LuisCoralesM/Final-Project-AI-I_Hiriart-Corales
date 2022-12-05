@@ -7,3 +7,5 @@
 *.mpeg
 *.tar.gz
 hub-model/*
+!data/pothole_image_data/pothole/*.jpg
+!object_detection/test_images/*.jpg
